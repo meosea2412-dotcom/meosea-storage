@@ -1,0 +1,38 @@
+{
+	"schemaVersion": 1,
+	"id": "meosea-storage",
+	"version": "${version}",
+	"name": "MeoSea Storage",
+	"description": "This is an example description! Tell everyone what your mod is about!",
+	"authors": [
+		"Me!"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/meosea-storage/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"com.meosea.meosea_storage.MeoSeaStorage"
+		],
+		"client": [
+			"com.meosea.meosea_storage.client.MeoSeaStorageClient"
+		]
+	},
+	"mixins": [
+		"meosea-storage.mixins.json",
+		{
+			"config": "meosea-storage.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.20.1",
+		"minecraft": "~26.3",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}
