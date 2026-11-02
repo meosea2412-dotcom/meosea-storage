@@ -1,7 +1,7 @@
 {
 	"schemaVersion": 1,
 	"id": "meosea-storage",
-	"version": "${version}",
+	"version": "1.0.0",
 	"name": "MeoSea Storage",
 	"description": "This is an example description! Tell everyone what your mod is about!",
 	"authors": [
@@ -9,25 +9,18 @@
 	],
 	"contact": {
 		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"sources": "https://github.com/meosea2412-dotcom/meosea-storage"
 	},
 	"license": "CC0-1.0",
 	"icon": "assets/meosea-storage/icon.png",
-	"environment": "*",
+	"environment": "server",
 	"entrypoints": {
 		"main": [
 			"com.meosea.meosea_storage.MeoSeaStorage"
-		],
-		"client": [
-			"com.meosea.meosea_storage.client.MeoSeaStorageClient"
 		]
 	},
 	"mixins": [
-		"meosea-storage.mixins.json",
-		{
-			"config": "meosea-storage.client.mixins.json",
-			"environment": "client"
-		}
+		"meosea-storage.mixins.json"
 	],
 	"depends": {
 		"fabricloader": ">=0.20.1",

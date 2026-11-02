@@ -1,6 +1,10 @@
 package com.meosea.meosea_storage;
 
+import com.meosea.meosea_storage.fabric.command.StorageDebugCommand;
+import com.meosea.meosea_storage.fabric.registry.ModScreenHandlers;
+
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 
 import net.minecraft.resources.Identifier;
 
@@ -22,6 +26,16 @@ public class MeoSeaStorage implements ModInitializer {
 		// Proceed with mild caution.
 
 		LOGGER.info("Hello Fabric world!");
+
+		ModScreenHandlers.register();
+
+		// TODO: package net.fabricmc.fabric.api.command.v2 là suy đoán theo Fabric API các bản
+		// gần đây mình biết — CHƯA kiểm chứng khớp bản 26.3. Nếu IDE báo lỗi "cannot resolve",
+		// dùng tool decompile (Ctrl+T) tìm "CommandRegistrationCallback" để lấy đúng package.
+		// Lệnh /storagetest chỉ để DEBUG — nhớ gỡ bỏ dòng dưới trước khi release bản chính thức.
+		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
+			StorageDebugCommand.register(dispatcher)
+		);
 	}
 
 	public static Identifier id(String path) {

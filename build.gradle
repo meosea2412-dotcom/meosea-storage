@@ -12,14 +12,15 @@ repositories {
 }
 
 loom {
-	splitEnvironmentSourceSets()
-
 	mods {
 		"meosea-storage" {
 			sourceSet sourceSets.main
-			sourceSet sourceSets.client
 		}
 	}
+}
+
+test {
+	useJUnitPlatform()
 }
 
 dependencies {
@@ -31,7 +32,8 @@ dependencies {
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 
 	testImplementation platform('org.junit:junit-bom:5.11.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
+	testImplementation 'org.junit.jupiter:junit-jupiter'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 processResources {
