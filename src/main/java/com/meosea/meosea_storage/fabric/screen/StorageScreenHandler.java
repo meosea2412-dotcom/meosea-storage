@@ -49,6 +49,7 @@ public class StorageScreenHandler extends AbstractContainerMenu {
     private static final int SLOT_PAGE_DOWN = DISPLAY_SLOT_COUNT + 5; // 53, hàng 6
 
     private final Storage storage;
+    private final Inventory playerInventory;
     private final StorageViewInventory viewInventory = new StorageViewInventory();
 
     private int page;
@@ -56,8 +57,28 @@ public class StorageScreenHandler extends AbstractContainerMenu {
     private String searchQuery = "";
 
     public StorageScreenHandler(final int syncId, final Inventory playerInventory, final Storage storage) {
+        this(syncId, playerInventory, storage, 0, StorageSortMode.NAME, "");
+    }
+
+    /**
+     * Dùng khi mở lại storage sau khi đóng StorageSearchMenu — giữ nguyên trang/sort/query thay
+     * vì reset về mặc định như constructor kia (vì đây LÀ 1 instance mới, không phải cùng 1
+     * object với trước khi mở search, nên không thể chỉ "giữ field cũ" — phải truyền tay vào).
+     */
+    public StorageScreenHandler(
+        final int syncId,
+        final Inventory playerInventory,
+        final Storage storage,
+        final int initialPage,
+        final StorageSortMode initialSortMode,
+        final String initialSearchQuery
+    ) {
         super(com.meosea.meosea_storage.fabric.registry.ModScreenHandlers.STORAGE, syncId);
         this.storage = storage;
+        this.playerInventory = playerInventory;
+        this.page = initialPage;
+        this.sortMode = initialSortMode;
+        this.searchQuery = initialSearchQuery;
 
         refreshView();
 
@@ -186,8 +207,47 @@ public class StorageScreenHandler extends AbstractContainerMenu {
     }
 
     private void handleSearchClick(final Player player) {
-        // TODO: mở khung nhập chữ thật cần 1 custom Screen phía client (anvil-style text input
-        // hoặc 1 packet riêng mở sign/book editor) — chưa làm, bấm vào đây hiện chưa có tác dụng.
+        if (!(player instanceof net.minecraft.server.level.ServerPlayer serverPlayer)) {
+            return;
+        }
+        final Storage capturedStorage = this.storage;
+        // mảng 1 phần tử để lambda bên trong sửa được (biến local phải effectively final, nên
+        // không thể gán thẳng String/int, phải bọc trong mảng hoặc holder object)
+        final String[] latestQuery = { this.searchQuery };
+        final StorageSortMode capturedSortMode = this.sortMode;
+
+        serverPlayer.openMenu(new net.minecraft.world.MenuProvider() {
+            @Override
+            public net.minecraft.network.chat.Component getDisplayName() {
+                return net.minecraft.network.chat.Component.literal("Tìm kiếm");
+            }
+
+            @Override
+            public AbstractContainerMenu createMenu(final int syncId, final Inventory inv, final Player p) {
+                return new StorageSearchMenu(
+                    syncId, inv, latestQuery[0],
+                    query -> latestQuery[0] = query,
+                    closedByPlayer -> {
+                        // Đóng StorageSearchMenu (Esc/E) -> mở lại GUI storage bằng instance MỚI,
+                        // truyền tay page=0 (vì search mới nên về trang 1), sortMode giữ nguyên,
+                        // searchQuery lấy từ latestQuery (giá trị mới nhất lúc đóng).
+                        if (closedByPlayer instanceof net.minecraft.server.level.ServerPlayer sp) {
+                            sp.openMenu(new net.minecraft.world.MenuProvider() {
+                                @Override
+                                public net.minecraft.network.chat.Component getDisplayName() {
+                                    return net.minecraft.network.chat.Component.literal("Storage");
+                                }
+
+                                @Override
+                                public AbstractContainerMenu createMenu(final int syncId2, final Inventory inv2, final Player p2) {
+                                    return new StorageScreenHandler(syncId2, inv2, capturedStorage, 0, capturedSortMode, latestQuery[0]);
+                                }
+                            });
+                        }
+                    }
+                );
+            }
+        });
     }
 
     private void cycleSortMode() {
